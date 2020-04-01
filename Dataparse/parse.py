@@ -1,4 +1,5 @@
 import os
+import re
 import json
 
 import msbt
@@ -22,6 +23,12 @@ for name in ['Fish', 'Insect', 'Fossil']:
 # Extract the names:
 for n, name in [('31', 'Fish'), ('30', 'Insect'), ('34', 'Fossil')]:
   item_messages[name] = msbt.parse_file(f"{cwd}/Extracted/STR_ItemName_{n}_{name}.msbt", verbose=True)
+
+# Tidy up data a little bit:
+for dictionary in [ fact_messages, item_messages ]:
+  for itemtype, data in dict.items(dictionary):    
+    data['attributes'] = [ val.strip('\x00') for val in data['attributes'] ]
+    data['attributes'] = [ val for val in data['attributes'] if val != '' ]
 
 export(all_styles, f"{cwd}/Output/styles.json")
 export(fact_messages, f"{cwd}/Output/comments.json")

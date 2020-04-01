@@ -67,14 +67,8 @@ def parse_file(filename, verbose=False):
           # Stop at the end of the block
           endpntr = block['offset'] + 0x10 + block['size']
 
-        while (pntr < endpntr):
-          char, pntr = lms.read(data, pntr, char_size)
-
-          # Decode the cahr
-          char = char.decode(f"utf-{info['encode']}")
-          msg_chars.append(char)
-        
-        messages.append(''.join(msg_chars))
+        message, pntr = lms.read(data, pntr, endpntr - pntr)
+        messages.append(message.decode(f"utf-{info['encode']}"))
 
     elif block['type'] == 'ATR1':
       attr_count, pntr = lms.read(data, pntr, 4)

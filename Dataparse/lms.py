@@ -95,7 +95,7 @@ def parse_labels(data, info, block):
 
   # Read the rest, should be all labels
   labels = []
-  while (pntr < block['offset'] + block['size']):
+  while (pntr < block['offset'] + block['size'] + 0x10):
     label = {}
 
     length, pntr = read(data, pntr, 1)
