@@ -14,8 +14,8 @@ from vendor import sarc
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 
-def main(romfs_path):
-  if romfs_path[1][-5:] != 'romfs' and '-f' not in romfs_path:
+def main(romfs_path, force=False):
+  if romfs_path[1][-5:] != 'romfs' and not force:
     print("Is this a valid romfs? (use -f to force)", file=sys.stderr)
     sys.exit(-1)
   else:
@@ -25,7 +25,7 @@ def main(romfs_path):
       sys.exit(-1)
   # done error checking
 
-  romfolder = os.path.realpath(romfs_path[1])
+  romfolder = os.path.realpath(romfs_path)
   os.makedirs(f"{cwd}/extracted/", exist_ok=True)
 
   for filename in glob(f"{romfolder}/Message/*"):
@@ -80,9 +80,9 @@ def main(romfs_path):
 
 if __name__ == "__main__":
   if len(sys.argv) <= 1:
-    if glob(f"{cwd}/romfs"): main([f"{cwd}/romfs/", "-f"])
+    if glob(f"{cwd}/romfs"): main(f"{cwd}/romfs/", force=True)
     else:
       print("Missing romfs file path.", file=sys.stderr)
       sys.exit(-1)
   else:
-    main(sys.argv)
+    main(sys.argv[1], force=bool('-f' in sys.argv))
