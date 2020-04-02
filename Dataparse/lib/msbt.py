@@ -6,7 +6,7 @@ import sys
 import errno
 
 # My own imports
-import lms
+from . import lms
 
 def parse_file(filename, verbose=False):
   try:

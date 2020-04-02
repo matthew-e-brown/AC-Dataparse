@@ -4,7 +4,7 @@
 import sys
 import errno
 
-import lms
+from . import lms
 
 def parse_file(filename, verbose=False):
   try:
