@@ -18,8 +18,7 @@ There are two python scripts in `./dataparse`.
 
 This file expects to be given a path to the `romfs` folder, extracted from the
 `.XCI` of *Animal Crossing: New Horizons*. How you get that `romfs` is up to
-your own discretion, but please, don't be a pirate. This was originally built
-from a legitimate copy from my own Switch.
+your own discretion.
 
 **As a prerequisite**, you must have
 [ZStandard](https://github.com/facebook/zstd) installed and on your `PATH` for
