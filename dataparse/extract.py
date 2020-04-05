@@ -12,6 +12,29 @@ from shutil import rmtree, copyfile
 
 from vendor import sarc
 
+# Edit this to change what the script exports
+EXTRACT_APP = True
+VALID_FILES = [
+  {
+    'archive_name': 'TalkSNpc',     # .sarc.zs file to pull from
+    'globname': 'owl/*',            # where to get the .msbt files from
+    'dialogues': [                  # files that you want
+      'SP_owl_Comment_Fish.msbt',
+      'SP_owl_Comment_Insect.msbt',
+      'SP_owl_Comment_Fossil.msbt'
+    ]
+  },
+  {
+    'archive_name': 'String',
+    'globname': 'Item/*',
+    'dialogues': [
+      'STR_ItemName_31_Fish.msbt',
+      'STR_ItemName_30_Insect.msbt',
+      'STR_ItemName_34_Fossil.msbt'
+    ]
+  }
+]
+
 cwd = os.path.dirname(os.path.realpath(__file__))
 
 def main(romfs_path, force=False):
@@ -23,6 +46,7 @@ def main(romfs_path, force=False):
     if which('zstd') is None:
       print("ZSTD is not found on PATH! Please install it.", file=sys.stderr)
       sys.exit(-1)
+    del which
   # done error checking
 
   romfolder = os.path.realpath(romfs_path)
@@ -32,19 +56,23 @@ def main(romfs_path, force=False):
     basename = os.path.basename(filename)
 
     # Yoink app real quick
-    if basename == 'App.msbp':
+    if EXTRACT_APP and basename == 'App.msbp':
       copyfile(filename, f"{cwd}/extracted/App.msbp")
 
-    match = re.search(r"(TalkSNpc|String)_([A-Z]{2}[a-z]{2})\.sarc\.zs", basename)
+    regexprefix = '|'.join(f['archive_name'] for f in VALID_FILES)
+    match = re.search(fr"({regexprefix})_([A-Z]{{2}}[a-z]{{2}})\.sarc\.zs", basename)
 
     # Skip the files that we don't need
     if not match: continue
     # Get the file info from the name
     filetype = match.group(1)
-    lang = match.group(2)
+    filelang = match.group(2)
+
+    # Check which dictionary entry we matched against
+    FILE = next((i for i in VALID_FILES if i['archive_name'] == filetype), None)
 
     # Make the temp directory
-    tempfolder = f"{cwd}/temp/{lang}"
+    tempfolder = f"{cwd}/temp/{filelang}"
     os.makedirs(tempfolder, exist_ok=True)
 
     # Decompress:
@@ -54,26 +82,13 @@ def main(romfs_path, force=False):
     with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f): # suppress print
       sarc.extract(f"{tempfolder}/{basename[:-3]}") # makes a folder w/o the sarc
 
-    # Find the MSBT files we want
-    if filetype == 'String':
-      globname = f"{tempfolder}/{basename[:-8]}/Item/*"
-    elif filetype == 'TalkSNpc':
-      globname = f"{tempfolder}/{basename[:-8]}/owl/*"
-
-    for dialoguefile in glob(globname):
+    # Glob the filenames defined in VALID_FILES
+    for dialoguefile in glob(f"{tempfolder}/{basename[:-8]}/{FILE['globname']}"):
       dialoguebase = os.path.basename(dialoguefile)
-      valid = [
-        'SP_owl_Comment_Fish.msbt',
-        'SP_owl_Comment_Insect.msbt',
-        'SP_owl_Comment_Fossil.msbt',
-        'STR_ItemName_31_Fish.msbt',
-        'STR_ItemName_30_Insect.msbt',
-        'STR_ItemName_34_Fossil.msbt'
-      ]
-      if dialoguebase not in valid: continue
+      if dialoguebase not in FILE['dialogues']: continue
 
-      os.makedirs(f"{cwd}/extracted/{lang}", exist_ok=True)
-      os.rename(dialoguefile, f"{cwd}/extracted/{lang}/{dialoguebase}")
+      os.makedirs(f"{cwd}/extracted/{filelang}", exist_ok=True)
+      os.rename(dialoguefile, f"{cwd}/extracted/{filelang}/{dialoguebase}")
 
   rmtree(f"{cwd}/temp")
 
