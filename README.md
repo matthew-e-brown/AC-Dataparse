@@ -14,15 +14,11 @@ That's where BlathersDB comes in!
 There are two python scripts in `./dataparse`.
 
 
-### `extract.py`
+### [`extract.py`](dataparse/extract.py)
 
 This file expects to be given a path to the `romfs` folder, extracted from the
 `.XCI` of *Animal Crossing: New Horizons*. How you get that `romfs` is up to
 your own discretion.
-
-**As a prerequisite**, you must have
-[ZStandard](https://github.com/facebook/zstd) installed and on your `PATH` for
-this script to work.
 
 This script will create a folder within the `dataparse` folder called
 `extracted`. In here, you will find `App.msbp`, the file that holds all of the
@@ -33,7 +29,7 @@ give to Blathers, as well as the dialogue files that label each of the item's
 names.
 
 
-### `parse.py`
+### [`parse.py`](dataparse/parse.py)
 
 This file will take the output of [`extract.py`](#extractpy) and read through
 the `.msbt` files to grab all of the dialogue. 

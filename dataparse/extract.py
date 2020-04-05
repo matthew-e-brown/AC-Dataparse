@@ -9,6 +9,7 @@ import contextlib
 from glob import glob
 from subprocess import call
 from shutil import rmtree, copyfile
+import zstandard as zstd
 
 from vendor import sarc
 
@@ -41,13 +42,6 @@ def main(romfs_path, force=False):
   if romfs_path[1][-5:] != 'romfs' and not force:
     print("Is this a valid romfs? (use -f to force)", file=sys.stderr)
     sys.exit(-1)
-  else:
-    from shutil import which
-    if which('zstd') is None:
-      print("ZSTD is not found on PATH! Please install it.", file=sys.stderr)
-      sys.exit(-1)
-    del which
-  # done error checking
 
   romfolder = os.path.realpath(romfs_path)
   os.makedirs(f"{cwd}/extracted/", exist_ok=True)
@@ -76,7 +70,9 @@ def main(romfs_path, force=False):
     os.makedirs(tempfolder, exist_ok=True)
 
     # Decompress:
-    call(['zstd', '-dfq', filename, '-o', f"{tempfolder}/{basename[:-3]}"])
+    with open(filename, 'rb') as s, open(f"{tempfolder}/{basename[:-3]}", 'w+b') as d:
+      decompressed = zstd.ZstdDecompressor().decompress(s.read())
+      d.write(decompressed)
 
     # Extract:
     with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f): # suppress print
@@ -94,7 +90,9 @@ def main(romfs_path, force=False):
 
 
 if __name__ == "__main__":
+  # Check if romfs given
   if len(sys.argv) <= 1:
+    # Check if in working dir
     if glob(f"{cwd}/romfs"): main(f"{cwd}/romfs/", force=True)
     else:
       print("Missing romfs file path.", file=sys.stderr)
