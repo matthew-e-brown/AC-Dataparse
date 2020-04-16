@@ -17,8 +17,8 @@ There are two python scripts in `./dataparse`.
 ### [`extract.py`](dataparse/extract.py)
 
 This file expects to be given a path to the `romfs` folder, extracted from the
-`.XCI` of *Animal Crossing: New Horizons*. How you get that `romfs` is up to
-your own discretion.
+`.XCI` of *Animal Crossing: New Horizons*, v.1.0.0. How you get that `romfs` is
+up to your own discretion.
 
 This script will create a folder within the `dataparse` folder called
 `extracted`. In here, you will find `App.msbp`, the file that holds all of the
@@ -35,6 +35,19 @@ This file will take the output of [`extract.py`](#extractpy) and read through
 the `.msbt` files to grab all of the dialogue. 
 
 Currently, this just exports them to JSON. This is temporary.
+
+
+## Vendors
+
+This is where I got all of the files in [`dataparse/vendor`](dataparse/vendor):
+
+- SARC Tool, AboodXD
+  - https://github.com/aboood40091/SARC-Tool
+- BCSV Tools and its specs, Treeki
+  - https://github.com/Treeki/CylindricalEarth
+
+The only modifications to these files have been to add links to their original
+repositories at the top.
 
 
 ---

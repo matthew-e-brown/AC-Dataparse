@@ -1,5 +1,4 @@
 # Extracts the .sarc.zs files to get MSBT files.
-# Requires zstd (https://github.com/facebook/zstd) to be on PATH
 
 import os
 import re
@@ -11,11 +10,12 @@ from subprocess import call
 from shutil import rmtree, copyfile
 import zstandard as zstd
 
+# SARC import from AboodXD (https://github.com/aboood40091/SARC-Tool)
 from vendor import sarc
 
 # Edit this to change what the script exports
 EXTRACT_APP = True
-VALID_FILES = [
+MSBT_FILES = [
   {
     'archive_name': 'TalkSNpc',     # .sarc.zs file to pull from
     'globname': 'owl/*',            # where to get the .msbt files from
@@ -36,6 +36,12 @@ VALID_FILES = [
   }
 ]
 
+BCSV_FILES = [
+  "FishAppearRiverParam.bcsv",
+  "FishAppearSeaParam.bcsv",
+  "InsectAppearParam.bcsv"
+]
+
 cwd = os.path.dirname(os.path.realpath(__file__))
 
 def main(romfs_path, force=False):
@@ -44,8 +50,16 @@ def main(romfs_path, force=False):
     sys.exit(-1)
 
   romfolder = os.path.realpath(romfs_path)
-  os.makedirs(f"{cwd}/extracted/", exist_ok=True)
 
+  # Make the destination folder
+  made = False
+  extracted = f"{cwd}/extracted/"
+  while not made:
+    try: os.makedirs(extracted, exist_ok=False); made = True
+    except FileExistsError: rmtree(extracted)
+  del made, extracted
+
+  # Get MSBT and MSBP Files
   for filename in glob(f"{romfolder}/Message/*"):
     basename = os.path.basename(filename)
 
@@ -53,7 +67,7 @@ def main(romfs_path, force=False):
     if EXTRACT_APP and basename == 'App.msbp':
       copyfile(filename, f"{cwd}/extracted/App.msbp")
 
-    regexprefix = '|'.join(f['archive_name'] for f in VALID_FILES)
+    regexprefix = '|'.join(f['archive_name'] for f in MSBT_FILES)
     match = re.search(fr"({regexprefix})_([A-Z]{{2}}[a-z]{{2}})\.sarc\.zs", basename)
 
     # Skip the files that we don't need
@@ -63,7 +77,7 @@ def main(romfs_path, force=False):
     filelang = match.group(2)
 
     # Check which dictionary entry we matched against
-    FILE = next((i for i in VALID_FILES if i['archive_name'] == filetype), None)
+    FILE = next((i for i in MSBT_FILES if i['archive_name'] == filetype), None)
 
     # Make the temp directory
     tempfolder = f"{cwd}/temp/{filelang}"
@@ -87,6 +101,13 @@ def main(romfs_path, force=False):
       os.rename(dialoguefile, f"{cwd}/extracted/{filelang}/{dialoguebase}")
 
   rmtree(f"{cwd}/temp")
+
+  for filename in glob(f"{romfolder}/Bcsv/*"):
+    basename = os.path.basename(filename)
+    if basename not in BCSV_FILES: continue
+
+    # No decompressing or extracting need to be done, so just copy it
+    copyfile(filename, f"{cwd}/extracted/{basename}")
 
 
 if __name__ == "__main__":
