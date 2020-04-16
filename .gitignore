@@ -1,2 +1,7 @@
 __pycache__
 .vscode
+
+temp
+romfs
+output
+extracted

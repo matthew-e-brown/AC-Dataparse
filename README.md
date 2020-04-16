@@ -1,20 +1,10 @@
-# BlathersDB
+# AC DataParse
 
-In Animal Crossing: New Horizons, the friendly museum curator Blathers offers
-fun facts for each new Fish, Insect, and Fossil you bring him. The only issue is
-that you can only hear them whenever you bring one of these items to him. When
-you're dealing with incredibly rare or out-of-season Fish for example, you will
-probably never hear each commentary once.
-
-That's where BlathersDB comes in!
+This is a series of scripts with the goal of extracting several files from
+Animal Crossing: New Horizons and formatting them in an SQL format.
 
 
-## Building
-
-There are two python scripts in `./dataparse`.
-
-
-### [`extract.py`](dataparse/extract.py)
+## [`extract.py`](extract.py)
 
 This file expects to be given a path to the `romfs` folder, extracted from the
 `.XCI` of *Animal Crossing: New Horizons*, v.1.0.0. How you get that `romfs` is
@@ -29,7 +19,7 @@ give to Blathers, as well as the dialogue files that label each of the item's
 names.
 
 
-### [`parse.py`](dataparse/parse.py)
+## [`parse.py`](parse.py)
 
 This file will take the output of [`extract.py`](#extractpy) and read through
 the `.msbt` files to grab all of the dialogue. 
