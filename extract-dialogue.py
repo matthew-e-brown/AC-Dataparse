@@ -1,4 +1,5 @@
-# Extracts the .sarc.zs files to get MSBT files.
+# Extracts the .sarc.zs files to get MSBT files. Places them all in the
+# "extracted" subfolder.
 
 import os
 import re
@@ -18,28 +19,24 @@ EXTRACT_APP = True
 MSBT_FILES = [
   {
     'archive_name': 'TalkSNpc',     # .sarc.zs file to pull from
-    'globname': 'owl/*',            # where to get the .msbt files from
+    'subfolder': 'owl/*',           # where to get the .msbt files from, within the archive
     'dialogues': [                  # files that you want
       'SP_owl_Comment_Fish.msbt',
       'SP_owl_Comment_Insect.msbt',
-      'SP_owl_Comment_Fossil.msbt'
+      'SP_owl_Comment_Fossil.msbt',
+      'SP_owl_22_Museum_RenualQuest.msbt'
     ]
   },
   {
     'archive_name': 'String',
-    'globname': 'Item/*',
+    'subfolder': 'Item/*',
     'dialogues': [
       'STR_ItemName_31_Fish.msbt',
       'STR_ItemName_30_Insect.msbt',
-      'STR_ItemName_34_Fossil.msbt'
+      'STR_ItemName_34_Fossil.msbt',
+      'STR_ItemName_01_Art.msbt'
     ]
   }
-]
-
-BCSV_FILES = [
-  "FishAppearRiverParam.bcsv",
-  "FishAppearSeaParam.bcsv",
-  "InsectAppearParam.bcsv"
 ]
 
 cwd = os.path.dirname(os.path.realpath(__file__))
@@ -93,7 +90,7 @@ def main(romfs_path, force=False):
       sarc.extract(f"{tempfolder}/{basename[:-3]}") # makes a folder w/o the sarc
 
     # Glob the filenames defined in VALID_FILES
-    for dialoguefile in glob(f"{tempfolder}/{basename[:-8]}/{FILE['globname']}"):
+    for dialoguefile in glob(f"{tempfolder}/{basename[:-8]}/{FILE['subfolder']}"):
       dialoguebase = os.path.basename(dialoguefile)
       if dialoguebase not in FILE['dialogues']: continue
 
@@ -101,13 +98,6 @@ def main(romfs_path, force=False):
       os.rename(dialoguefile, f"{cwd}/extracted/{filelang}/{dialoguebase}")
 
   rmtree(f"{cwd}/temp")
-
-  for filename in glob(f"{romfolder}/Bcsv/*"):
-    basename = os.path.basename(filename)
-    if basename not in BCSV_FILES: continue
-
-    # No decompressing or extracting need to be done, so just copy it
-    copyfile(filename, f"{cwd}/extracted/{basename}")
 
 
 if __name__ == "__main__":

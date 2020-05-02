@@ -1,9 +1,6 @@
 # Functions for handling the superset of MSBT and MSBP files
 # https://github.com/Kinnay/Nintendo-File-Formats/wiki/LMS-File-Format
 
-global ENDIAN
-ENDIAN = 'little'
-
 def calculate_hash(label, num_slots):
   hash = 0
   for char in label:
