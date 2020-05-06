@@ -58,4 +58,12 @@ for output, files in OUTPUTS.items():
         print(f"    Couldn't access {f[0]}. Skipping.")
         continue
 
+      # Convert from three lists to one dictionary
+      data[lang][f[1]] = {
+        label['value']: {
+          'attribute': data[lang][f[1]]['attributes'][label['index']],
+          'message': data[lang][f[1]]['messages'][label['index']]
+        } for label in data[lang][f[1]]['labels']
+      }
+
   export(data, f"{cwd}/output/{output}.json")

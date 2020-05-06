@@ -101,10 +101,10 @@ def parse_labels(data, info, block):
     label['value'], pntr = read(data, pntr, length)
     label['value'] = label['value'].decode('utf-8') # always utf8
 
-    label['itemindex'], pntr = read(data, pntr, 4)
-    label['itemindex'] = info['convert'](label['itemindex'])
+    label['index'], pntr = read(data, pntr, 4)
+    label['index'] = info['convert'](label['index'])
 
     labels.append(label)
 
-  labels = sorted(labels, key=lambda l: l['itemindex'])
+  labels = sorted(labels, key=lambda l: l['index'])
   return labels, pntr
