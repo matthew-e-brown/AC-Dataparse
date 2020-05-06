@@ -36,6 +36,29 @@ MSBT_FILES = [
       'STR_ItemName_34_Fossil.msbt',
       'STR_ItemName_01_Art.msbt'
     ]
+  },
+  {
+    'archive_name': 'String',
+    'subfolder': 'Sp/*',
+    'dialogues': [
+      'STR_Dinosaur.msbt'
+    ]
+  },
+  {
+    'archive_name': 'TalkObj',
+    'subfolder': '*',
+    'dialogues': [
+      'OBJ_Nameboard.msbt'
+    ]
+  },
+  {
+    'archive_name': 'TalkSys',
+    'subfolder': '*',
+    'dialogues': [
+      'SYS_Get_Fish.msbt',
+      'SYS_Get_Insect.msbt',
+      'SYS_Museum_Art.msbt'
+    ]
   }
 ]
 

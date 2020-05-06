@@ -79,7 +79,10 @@ def parse_file(filename, verbose=False):
 
       for i in range(0, attr_count):
         attr, pntr = lms.read(data, pntr, attr_size)
-        attr = attr.decode(f"utf-{info['encode']}")
+        try:
+          attr = attr.decode(f"utf-{info['encode']}")
+        except UnicodeDecodeError as e:
+          attr = int.from_bytes(attr, info['endian'])
 
         attributes.append(attr)
 

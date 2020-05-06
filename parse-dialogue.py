@@ -1,57 +1,61 @@
-# Parses the 
-
 import os
 import re
 import json
-
-cwd = os.path.dirname(os.path.realpath(__file__))
+import shutil
 
 from lib import msbt
 from lib import msbp
 
 def export(data, filename):
   os.makedirs(os.path.dirname(filename), exist_ok=True)
-  with open(filename, 'w+') as exportfile:
-    json.dump(data, exportfile, sort_keys=True, indent=2)
+  with open(filename, 'w+', encoding='utf-16') as exportfile:
+    json.dump(data, exportfile, sort_keys=True, indent=2, ensure_ascii=False)
 
+def get_subdirs(dirname):
+  return [ f for f in os.listdir(dirname) if os.path.isdir(f"{dirname}/{f}") ]
 
-all_styles = msbp.parse_file(f"{cwd}/extracted/App.msbp", verbose=True)
-fact_messages = {}
-item_messages = {}
-fox_stuff = {}
+cwd = os.path.dirname(os.path.realpath(__file__))
+all_styles = msbp.parse_file(f"{cwd}/extracted/App.msbp", verbose=False)
+
+# The JSON files that should be made and what MSBT they come from
+OUTPUTS = {
+  'Comments': [
+    # (File to come from, JSON key)
+    ('SP_owl_Comment_Fish.msbt', 'Fish'),
+    ('SP_owl_Comment_Fossil.msbt', 'Fossil'),
+    ('SP_owl_Comment_Insect.msbt', 'Insect')
+  ],
+  'ItemNames': [
+    ('STR_ItemName_01_Art.msbt', 'Art'),
+    ('STR_ItemName_30_Insect.msbt', 'Fish'),
+    ('STR_ItemName_31_Fish.msbt', 'Fossil'),
+    ('STR_ItemName_34_Fossil.msbt', 'Insect')
+  ],
+  'CatchPuns': [
+    ('SYS_Get_Fish.msbt', 'Fish'),
+    ('SYS_Get_Insect.msbt', 'Insect')
+  ],
+  'ArtFacts': [
+    ('SYS_Museum_Art.msbt', 'Art')
+  ]
+}
+
+# Clear old files
+shutil.rmtree(f"{cwd}/output", ignore_errors=True)
 
 # Each "filename" is a different language
-for lang in [ f for f in os.listdir(f"{cwd}/extracted") if os.path.isdir(f"{cwd}/extracted/{f}") ]:
-  print(f"Parsing {lang}:")
-  fact_messages[lang] = {}
-  item_messages[lang] = {}
-  fox_stuff[lang] = {}
+for output, files in OUTPUTS.items():
+  print(f"Parsing {output}:") # JSON output
+  data = {}
+  for lang in get_subdirs(f"{cwd}/extracted"):
+    data[lang] = {}
+    print(f"  Parsing {lang}:")
+    for f in files:
+      print(f"    Parsing {f[0]}") # individual MSBT
+      try:
+        data[lang][f[1]] = msbt.parse_file(f"{cwd}/extracted/{lang}/{f[0]}", verbose=False)
+      except IOError as e:
+        print(f"    Couldn't access {f[0]}. Skipping.")
+        continue
 
-  # Extract the comments:
-  for name in ['Fish', 'Insect', 'Fossil']:
-    fact_messages[lang][name] = msbt.parse_file(f"{cwd}/extracted/{lang}/SP_owl_Comment_{name}.msbt", verbose=True)
-
-  fox_stuff[lang] = msbt.parse_file(f"{cwd}/extracted/{lang}/SP_owl_22_Museum_RenualQuest.msbt", verbose=True)
-
-  # Extract the names:
-  for n, name in [('01', 'Art'), ('31', 'Fish'), ('30', 'Insect'), ('34', 'Fossil')]:
-    item_messages[lang][name] = msbt.parse_file(f"{cwd}/extracted/{lang}/STR_ItemName_{n}_{name}.msbt", verbose=True)
-
-  print("\n", end='')
-
-# Tidy up data a little bit:
-for lang in item_messages.values():            # CHzh
-  for item in lang.values():                   # Fish
-    for i, m in enumerate(item['messages']):   # List of messages
-      # \u000e2\u0000\u0004\u0100\ucd03koi\u0000
-      # m = m[:-1] # cut off null terminator
-      # if m[0] == '\u000e':
-      #   m = m[6:] # cut off first six "junk(?)" chars
-
-      item['messages'][i] = m
-
-
-export(all_styles, f"{cwd}/output/styles.json")
-export(fact_messages, f"{cwd}/output/comments.json")
-export(item_messages, f"{cwd}/output/names.json")
-export(fox_stuff, f"{cwd}/output/renual.json")
+  export(data, f"{cwd}/output/{output}.json")
