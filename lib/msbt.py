@@ -18,7 +18,7 @@ def parse_file(filename, verbose=False):
     elif e.errno == errno.ENOENT:
       print(f"Cannot find {e.filename}", file=sys.stderr)
     else:
-      print(f"Uknown errno: {e.errno}", sys.stderr)
+      print(f"Uknown errno: {e.errno}", file=sys.stderr)
 
     if __name__ != "__main__": raise e
     else: sys.exit(-1)
@@ -65,11 +65,7 @@ def parse_file(filename, verbose=False):
           endpntr = block['offset'] + 0x10 + block['size']
 
         message, pntr = lms.read(data, pntr, endpntr - pntr)
-
-        message = message.decode(f"utf-{info['encode']}")
-        message = message.split('\u0000')[:-1] # Split at the null terminators
-
-        messages.append(message)
+        messages.append(message.decode(f"utf-{info['encode']}"))
 
     elif block['type'] == 'ATR1':
       attr_count, pntr = lms.read(data, pntr, 4)
