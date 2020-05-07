@@ -12,6 +12,9 @@ For help understanding some of the scripts, check out Kinnay's Wiki on
 Nintendo's custom file formats,
 [here](https://github.com/Kinnay/Nintendo-File-Formats/wiki).
 
+See [`Notes.md`](Notes.md) for a rundown of how the `00 0e` escape sequences
+work.
+
 
 ## Scripts
 

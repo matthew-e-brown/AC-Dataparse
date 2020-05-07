@@ -1,24 +1,43 @@
-```json
-[
-  "\u000e((\u0004\ucd00\u0000As herbivores go, \u000e\u0000\u0003\u0002\u0001Triceratops\u000e\u0000\u0003\u0002\uffff was\nunusually well equipped for\ncombat, wot!\n\u000e(\u001b\u0004\ucd00\u0000Its three horns and impressive, bony\nfrill probably helped it fight off\npredators like T. Rex!\n\u000e()\u0004\ucd00\u0000The frill may also have been involved\nin temperature regulation, or else in\nattracting mates.\n\u000e(&\u0004\ucd00\u0000 {? emote, start of a new blurb} Does it seem to you like virtually all\ndistinctive dinosaur features were for\nbody heat or attracting mates?\u0000",
-  "\u000e((\u0004\ucd00\u0000As herbivores go, \u000e\u0000\u0003\u0002\u0001Triceratops\u000e\u0000\u0003\u0002\uffff was\nunusually well equipped for\ncombat, wot!\n\u000e(\u001b\u0004\ucd00\u0000Its three horns and impressive, bony\nfrill probably helped it fight off\npredators like T. Rex!\n\u000e()\u0004\ucd00\u0000The frill may also have been involved\nin temperature regulation, or else in\nattracting mates.\n\u000e(&\u0004\ucd00\u0000 {? emote, start of a new blurb} Does it seem to you like virtually all\ndistinctive dinosaur features were for\nbody heat or attracting mates?\u0000",
-  "\u000e((\u0004\ucd00\u0000As herbivores go, \u000e\u0000\u0003\u0002\u0001Triceratops\u000e\u0000\u0003\u0002\uffff was\nunusually well equipped for\ncombat, wot!\n\u000e(\u001b\u0004\ucd00\u0000Its three horns and impressive, bony\nfrill probably helped it fight off\npredators like T. Rex!\n\u000e()\u0004\ucd00\u0000The frill may also have been involved\nin temperature regulation, or else in\nattracting mates.\n\u000e(&\u0004\ucd00\u0000 {? emote, start of a new blurb} Does it seem to you like virtually all\ndistinctive dinosaur features were for\nbody heat or attracting mates?\u0000"
-]
+# `00 0e` Control Sequences
 
-[
-  "\u000e(\r\u0004\ucd00\u0000 {... emote} Ah, yes. \u000e\u0000\u0003\u0002\u0001Archelon\u000e\u0000\u0003\u0002\uffff. It was a sort of\nhuge sea turtle.\u000e(\u0000\u0004\ucd00\u0000 \u000e\n\u0002\u0000The largest thus far\nfound, if you want to know.\n\u000e(\f\u0004\ucd00\u0000They were very sizable\u2014some 13 feet\nlong, with a shell the size of a small\ncar{\u000en\u0000\u0000\u000e\n\u0003\u0000 ... and a pause} If you're into that sort of thing.\n\u000e(\u000b\u0004\ucd00\u0000They likely ate seaweed, shrimp,\noctopus, and possibly ammonites,\ngiven the era involved.\n\u000e(\u0012\u0004\ucd00\u0000 {some sort of woozy emote} It seems CERTAIN giant turtles had\nto be prima donnas and\u000e('\u0004\ucd00\u0000 {head shake emote} eat some of\nthe oldest life forms on earth!\u0000",
-  "\u000e(\r\u0004\ucd00\u0000 {... emote} Ah, yes. \u000e\u0000\u0003\u0002\u0001Archelon\u000e\u0000\u0003\u0002\uffff. It was a sort of\nhuge sea turtle.\u000e(\u0000\u0004\ucd00\u0000 \u000e\n\u0002\u0000The largest thus far\nfound, if you want to know.\n\u000e(\f\u0004\ucd00\u0000They were very sizable\u2014some 13 feet\nlong, with a shell the size of a small\ncar{\u000en\u0000\u0000\u000e\n\u0003\u0000 ... and a pause} If you're into that sort of thing.\n\u000e(\u000b\u0004\ucd00\u0000They likely ate seaweed, shrimp,\noctopus, and possibly ammonites,\ngiven the era involved.\n\u000e(\u0012\u0004\ucd00\u0000 {some sort of woozy emote} It seems CERTAIN giant turtles had\nto be prima donnas and\u000e('\u0004\ucd00\u0000 {head shake emote} eat some of\nthe oldest life forms on earth!\u0000",
-]
+Using some information from
+[here](https://zeldamods.org/wiki/Msbt#Text_Commands), I've discovered how these
+control sequences seem to work. Now all I have to do is to figure out what each
+code means.
 
-[
-  "\u000e(\u0006\u0004\ucd00\u0000Ah, yes, the \u000e\u0000\u0003\u0002\u0001\u000e2\u0000\u0004\u0100\ucd03juramaia\u000e\u0000\u0003\u0002\uffff: one of the\nfirst mammals, \u000e\n\u0002\u0000 {pause} and one of the few\nto live alongside the dinosaurs!\n\u000e()\u0004\ucd00\u0000In order to hide from much larger\ndinosaurs, it was less than four\ninches long and quite unobtrusive.\n\u000e(\u001e\u0004\ucd00\u0000 {light bulb emote} Some even theorize that these\nmammals were nocturnal until\nthe dinosaurs went extinct.\n\u000e(:\u0004\ucd00\u0000 {head tilt forward} They needed every advantage to live\namong those behemoths. They were\nnocturnal before it was cool!\u0000",
-]
 
-[
-  "\u000e(\b\u0004\ucd00\u0000The \u000e\u0000\u0003\u0002\u0001\u000e{head down}2\u0000\u0004\u0200\ucd03Atlas moth\u000e\u0000\u0003\u0002\uffff is a monstrous thing!\u000e\n\u0002\u0000\n\u000e(\u0000\u0004\ucd00\u0000Not only is it one of the largest\nmoths in the world\u000en\u0000\u0000\n\u000e{slow ...}(\u0013\u0004\ucd00\u0000{worried emote}The tips of its wings look rather like\nthe heads of venomous snakes!\u000e\u0000\u0004\u0000\u000e(9\u0004\ucd00\u0000{stare emote}Despite its largeness and loathsome\nlooks,\u000e\n\u0002\u0000 the adult \u000e\u0000\u0003\u0002\u0001\u000e2\u0000\u0004\u0200\ucd03Atlas moth \u000e(\u0012\u0004\ucd00\u0000\u000e\u0000\u0003\u0002\uffff {scoff @ u lol emote} lives\nonly for a few days.\n\u000e()\u0004\ucd00\u0000It emerges from its cocoon without a\nmouth, you see\u000en\u0000\u0000\u000e\n\u0002\u0000\u000e('\u0004\ucd00\u0000 {slow ... then pause} and so cannot eat.\u000e\n\u0000\u0002(\n\u000e(\u000b\u0004\ucd00\u0000\u000e\u0000\u0002\u0002K {SMALL TEXT} I feel for the poor thing\u000en\u0000\u0000\u000e\n\u0002\u0000\u000e(\b\u0004\ucd00\u0000 {slow ... then pause} but it is still foul!\u000e\u0000\u0002\u0002d\u0000",
-]
-```
+## Command Types
 
-- It seems that the escape sequences all start with the two bytes, "00 0E", or,
-  \u000e
-- They seem to be all roughly 6 chars (12 bytes in utf16) long
+Each command has two bytes (unsigned short) immediately after its `00 0e` byte.
+This is its *command type*. The following is a list of the known command types.
+The *UTF-16-LE* column is what the two command type bytes will be decoded as if
+you decode the entire string as UTF-16 using Little Endian (what AC:NH uses).
+You can click the entry in the command type column to be taken to a longer
+explanation, where applicable.
+
+| Command Type              | UTF-16-LE | Additional Bytes    | Meaning     |
+| :------------------------ | :-------- | :------------------ | :---------- |
+| [`00 00`](#00-00-command) | N/A       | 6 bytes, 3 shorts   | Modify Text |
+| [`00 0a`](#00-0a-command) | `\n`      | 4 bytes, 2 shorts   | *Unkown*    |
+| [`00 28`](#00-28-command) | `(`       | 6 bytes, 3 shorts   | *Unkown*    |
+
+Many of these command types have extra bytes attached to them. These are
+*command options*. Each command has its known/supposed command options listed
+below.
+
+
+### `00 00` Command
+
+This command seems to modify text. After most critter names, the sequence is `00
+0ee`, `00 00`, `00 03`, `00 02`, `ff ff`. This seems to suggest that, per
+ZeldaMods' table, the `FF FF` bytes are used to turn text back to white.
+
+
+### `00 0a` Command
+
+Currently unknown.
+
+
+### `00 28` Command
+
+Currently unknown.
