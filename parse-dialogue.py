@@ -61,8 +61,8 @@ for output, files in OUTPUTS.items():
       # Convert from three lists to one dictionary
       data[lang][f[1]] = {
         label['value']: {
-          'attribute': data[lang][f[1]]['attributes'][label['index']],
-          'message': data[lang][f[1]]['messages'][label['index']]
+          'attributes': data[lang][f[1]]['attributes'][label['index']],
+          'messages': data[lang][f[1]]['messages'][label['index']]
         } for label in data[lang][f[1]]['labels']
       }
 

@@ -19,7 +19,7 @@ def parse_file(filename, verbose=False):
       print(f"Cannot find {e.filename}", file=sys.stderr)
     else:
       print(f"Uknown errno: {e.errno}", sys.stderr)
-    
+
     if __name__ != "__main__": raise e
     else: sys.exit(-1)
 
@@ -56,9 +56,6 @@ def parse_file(filename, verbose=False):
 
       # Now read their text
       for i, offset in enumerate(offsets):
-        msg_chars = []
-        char_size = int(info['encode'] / 8) # utf-16 = 2 long
-
         pntr = block['offset'] + 0x10 + offset
         if (i < len(offsets) - 1): # If there is a next message
           # Stop at the start of the next message
@@ -68,7 +65,11 @@ def parse_file(filename, verbose=False):
           endpntr = block['offset'] + 0x10 + block['size']
 
         message, pntr = lms.read(data, pntr, endpntr - pntr)
-        messages.append(message.decode(f"utf-{info['encode']}"))
+
+        message = message.decode(f"utf-{info['encode']}")
+        message = message.split('\u0000')[:-1] # Split at the null terminators
+
+        messages.append(message)
 
     elif block['type'] == 'ATR1':
       attr_count, pntr = lms.read(data, pntr, 4)
@@ -79,6 +80,7 @@ def parse_file(filename, verbose=False):
 
       for i in range(0, attr_count):
         attr, pntr = lms.read(data, pntr, attr_size)
+        # Decode as unicode if possible... else just make it an int
         try:
           attr = attr.decode(f"utf-{info['encode']}")
         except UnicodeDecodeError as e:
