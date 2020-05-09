@@ -8,6 +8,11 @@ import errno
 # My own imports
 from . import lms
 
+def hex_stringify(bytestring):
+  s = bytestring.hex().upper()
+  return " ".join(s[i : i+2] for i in range(0, len(s), 2))
+
+
 def parse_file(filename, verbose=False):
   try:
     with open(filename, 'rb') as f:
@@ -18,7 +23,7 @@ def parse_file(filename, verbose=False):
     elif e.errno == errno.ENOENT:
       print(f"Cannot find {e.filename}", file=sys.stderr)
     else:
-      print(f"Uknown errno: {e.errno}", file=sys.stderr)
+      print(f"Unknown errno: {e.errno}", file=sys.stderr)
 
     if __name__ != "__main__": raise e
     else: sys.exit(-1)
@@ -65,7 +70,14 @@ def parse_file(filename, verbose=False):
           endpntr = block['offset'] + 0x10 + block['size']
 
         message, pntr = lms.read(data, pntr, endpntr - pntr)
-        messages.append(message.decode(f"utf-{info['encode']}"))
+        message, commands = process_escapes(message, info['endian'], verbose)
+
+        message = {
+          'body': message.decode(f"utf-{info['encode']}"),
+          'commands': commands
+        }
+
+        messages.append(message)
 
     elif block['type'] == 'ATR1':
       attr_count, pntr = lms.read(data, pntr, 4)
@@ -76,18 +88,101 @@ def parse_file(filename, verbose=False):
 
       for i in range(0, attr_count):
         attr, pntr = lms.read(data, pntr, attr_size)
-        # Decode as unicode if possible... else just make it an int
-        try:
-          attr = attr.decode(f"utf-{info['encode']}")
-        except UnicodeDecodeError as e:
-          attr = int.from_bytes(attr, info['endian'])
-
+        # Just stringify their bytes
+        attr = hex_stringify(attr)
         attributes.append(attr)
 
   message_data = {
     'labels': labels,
-    'messages': messages,
+    'message': messages,
     'attributes': attributes
   }
 
   return message_data
+
+
+def process_escapes(message, endian, verbose=False):
+  commands = []
+
+  # Split the message into a list of pairs of two bytes
+  raw_bytes = ( message[i:i + 2] for i in range(0, len(message), 2) )
+  iterator = enumerate(raw_bytes)
+  for i, pair in iterator:
+    # Command escape
+    if pair == b'\x0e\x00':
+      command = {}
+      command['index'] = i # the index into the iterator the command is found
+      command['type'] = next(iterator)[1] # Read next pair of bytes
+
+      # - Variable length commands
+      if command['type'] == b'\x00\x00':
+        command['variant'] = next(iterator)[1]
+        if command['variant'] == b'\x00\x00': command['optlen'] = 3
+        elif command['variant'] == b'\x02\x00': command['optlen'] = 2
+        elif command['variant'] == b'\x03\x00': command['optlen'] = 2
+        elif command['variant'] == b'\x04\x00': command['optlen'] = 1
+
+      # - Variable length, no variants. Will be read until 0x0000
+      elif command['type'] == b'\x3c\x00':
+        command['variant'] = None
+        command['optlen'] = None
+
+      # - Constant length commands
+      else:
+        command['variant'] = None # these commands have no variants
+
+        if command['type'] == b'\x28\x00': command['optlen'] = 4
+        elif command['type'] == b'\x0a\x00': command['optlen'] = 2
+        elif command['type'] == b'\x6e\x00': command['optlen'] = 2
+        elif command['type'] == b'\x32\x00': command['optlen'] = 4
+        elif command['type'] == b'\x3c\x00': command['optlen'] = 1
+        else:
+          # Weird russian exception in SYS_Get_Fish.msbt in one spot
+          if command['type'] == b'\x3f\x04': continue
+          raise Exception(f"Unknown command: 0x{command['type'].hex()}")
+
+      # -- Now that we know how many shorts (options) follow, grab them
+      command['options'] = []
+      reads = 0
+      while True: # certain types have different break-points
+        raw_option = next(iterator)[1]
+
+        # break if optlen not given, and we hit a 0x0000 string
+        if command['optlen'] is None and raw_option == b'\x00\x00':
+          # store how many bytes we read, used to cut them off later
+          command['optlen'] = reads + 1
+          break
+
+        # Else
+        reads += 1
+        option = int.from_bytes(raw_option, endian, signed=False)
+        command['options'].append(option)
+
+        # break if optlen is given *and* surpassed
+        if command['optlen'] is not None and reads >= command['optlen']:
+          break
+
+      # Serialize the type and variant (can't be binary-strings)
+      for prop in ('variant', 'type'):
+        if command[prop] is not None:
+          command[prop] = hex_stringify(command[prop])
+
+      commands.append(command)
+
+  # End of iterating 
+
+  # -- Now that we have the commands extracted, cut them from the main string
+  # A lot of numbers need to be doubled to go from counting shorts to bytes...
+  totalcut = 0
+  for command in commands:
+    cutsize = command['optlen'] + 2 # include escape and type (0E 00 & 28 00)
+    if command['variant'] is not None: cutsize += 1 # include variant byte
+    cutsize *= 2
+
+    start = command['index'] * 2 - totalcut
+    message = message[0 : start] + message[start + cutsize : ]
+
+    totalcut += cutsize
+    del command['optlen']
+
+  return message, commands

@@ -41,29 +41,29 @@ OUTPUTS = {
 }
 
 # Clear old files
-shutil.rmtree(f"{cwd}/output", ignore_errors=True)
+shutil.rmtree(f"{cwd}/parsed", ignore_errors=True)
 
 # Each "filename" is a different language
 for output, files in OUTPUTS.items():
   print(f"Parsing {output}:") # JSON output
-  data = {}
   for lang in get_subdirs(f"{cwd}/extracted"):
-    data[lang] = {}
+    data = {}
     print(f"  Parsing {lang}:")
-    for f in files:
-      print(f"    Parsing {f[0]}") # individual MSBT
+    for (name, key) in files:
+      print(f"    Parsing {name}") # individual MSBT
       try:
-        data[lang][f[1]] = msbt.parse_file(f"{cwd}/extracted/{lang}/{f[0]}", verbose=False)
+        data[key] = msbt.parse_file(f"{cwd}/extracted/{lang}/{name}", verbose=False)
       except IOError as e:
-        print(f"    Couldn't access {f[0]}. Skipping.")
+        print(f"    Couldn't access {name}. Skipping.")
         continue
 
       # Convert from three lists to one dictionary
-      data[lang][f[1]] = {
+      data[key] = {
         label['value']: {
-          'attributes': data[lang][f[1]]['attributes'][label['index']],
-          'messages': data[lang][f[1]]['messages'][label['index']]
-        } for label in data[lang][f[1]]['labels']
+          'attributes': data[key]['attributes'][label['index']],
+          'message': data[key]['message'][label['index']]
+        } for label in data[key]['labels']
       }
 
-  export(data, f"{cwd}/output/{output}.json")
+    # Need to give each language its own folder to avoid MemoryError
+    export(data, f"{cwd}/parsed/{lang}/{output}.json")
