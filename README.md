@@ -37,7 +37,7 @@ names.
 
 This file will take the output of [`extract.py`](#extractpy) and read through
 the `.msbt` files to grab all of the dialogue. They are exported to a folder
-called `output`.
+called `parsed`.
 
 
 ## Vendors
