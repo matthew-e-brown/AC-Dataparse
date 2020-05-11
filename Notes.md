@@ -142,5 +142,15 @@ Yup. This is definitely a `00 00` terminated command.
 
 ## Anomalies
 
-In one single file, `EUru/SYS_Get_Fish,msbt`, there's a single `0E 00` which is
-not part of an escape sequence/command.
+In one single file, `EUru/SYS_Get_Fish.msbt`, there's a single `0E 00` which is
+not part of an escape sequence/command. It appears at offset `0x33A0`, and is
+between
+
+- `3F 04` `3E 04` `39 04` `3C 04` `30 04` `3B 04`: поймал; and
+- `3F 04` `3E 04` `39 04` `3C 04` `30 04` `3B 04` `30 04`: поймала.
+
+These are the masculine and feminine versions of thee same word; "caught." It is
+unclear why this is the only case where this disctinction uses the `0E 00` byte
+sequence. Perhaps this is because it occurs in the, "Woo-hoo! I've caught all
+the fish! You'd think I'd have a pun for this..." message, and this is the first
+place that the Russian translation has the player character refer to themselves?
