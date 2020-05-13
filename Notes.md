@@ -12,6 +12,30 @@ to `\uCDAB`.
 
 ---
 
+## Table of Contents
+
+- [`E0 00` Control Sequences](#e0-00-control-sequences)
+  - [Table of Contents](#table-of-contents)
+  - [Command Types](#command-types)
+    - [`00 00` Command Type](#00-00-command-type)
+      - [`00 00` Command Variant](#00-00-command-variant)
+      - [`02 00` Command Variant](#02-00-command-variant)
+      - [`03 00` Command Variant](#03-00-command-variant)
+      - [`04 00` Command Variant](#04-00-command-variant)
+    - [`28 00` Command Type](#28-00-command-type)
+    - [`0A 00` Command Type](#0a-00-command-type)
+      - [`00 00` Command Variant](#00-00-command-variant-1)
+      - [`01 00` Command Variant](#01-00-command-variant)
+      - [`02 00` Command Variant](#02-00-command-variant-1)
+      - [`0A 00` Command Variant](#0a-00-command-variant)
+    - [`6E 00` Command Type](#6e-00-command-type)
+    - [`32 00` Command Type](#32-00-command-type)
+    - [`3C 00` Command Type](#3c-00-command-type)
+      - [Rough/Scratch notes](#roughscratch-notes)
+  - [Anomalies](#anomalies)
+
+---
+
 
 ## Command Types
 
@@ -154,10 +178,10 @@ Currently unknown. This command always seems to be of the form `0E 00` `0A 00`
 `02 00` `00 00`.
 
 
-#### `0a 00` Command Variant
+#### `0A 00` Command Variant
 
 Currently unknown. This command always seems to be of the form `0E 00` `0A 00`
-`0a 00` `00 00`.
+`0A 00` `00 00`.
 
 
 ### `6E 00` Command Type

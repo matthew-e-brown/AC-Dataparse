@@ -101,90 +101,92 @@ def parse_file(filename, verbose=False):
   return message_data
 
 
+# Guide to adding commands (see Notes.md)
+# - If it's a constant length command, just add its optlen.
+# - If it has variants, add another dict that holds each variant's optlen.
+# - If the command has variable option length where it should be read until a
+#   terminator short (2 bytes), include a tuple indicating that short and if the
+#   terminator should be kept in the options array
+OPTION_LENGTHS = {
+  '28 00': 4,
+  '6E 00': 2,
+  '32 00': 4,
+  '3C 00': ( '00 00', True ),
+  '00 00': { '00 00': 3, '02 00': 2, '03 00': 2, '04 00': 1 },
+  '0A 00': { '00 00': 2, 'else': 1 }
+}
+
 def process_commands(message, endian, verbose=False):
   commands = []
 
   # Split the message into a list of pairs of two bytes
-  raw_bytes = ( message[i:i + 2] for i in range(0, len(message), 2) )
-  iterator = enumerate(raw_bytes)
+  short = ( message[i:i + 2] for i in range(0, len(message), 2) )
+  iterator = enumerate(short)
   for i, pair in iterator:
     # Command escape
     if pair == b'\x0e\x00':
-      command = {}
-      command['index'] = i # the index into the iterator the command is found
-      command['type'] = next(iterator)[1] # Read next pair of bytes
+      c_index = i # the index into the iterator the command is found
+      c_type = hex_stringify(next(iterator)[1]) # Read next pair of bytes
 
-      # - Variable length command
-      if command['type'] == b'\x00\x00':
-        command['variant'] = next(iterator)[1]
-        if command['variant'] == b'\x00\x00': command['optlen'] = 3
-        elif command['variant'] == b'\x02\x00': command['optlen'] = 2
-        elif command['variant'] == b'\x03\x00': command['optlen'] = 2
-        elif command['variant'] == b'\x04\x00': command['optlen'] = 1
-      
-      elif command['type'] == b'\x0a\x00':
-        command['variant'] = next(iterator)[1]
-        if command['variant'] == b'\x00\x00': command['optlen'] = 2
-        # See notes: I think this command type is a "00 00 vs everything else"
-        # situation.
-        #
-        # elif command['variant'] == b'\x01\x00': command['optlen'] = 1
-        # elif command['variant'] == b'\x02\x00': command['optlen'] = 1
-        # elif command['variant'] == b'\x0a\x00': command['optlen'] = 1
-        # else:
-        #   s1 = hex_stringify(command['type'])
-        #   s2 = hex_stringify(command['variant'])
-        #   raise Exception(f"Unknown variant: 0x{s2} in command 0x{s1} at pair {i}")
-        else: command['optlen'] = 1
-
-      # - Variable length, no variants. Will be read until 0x0000
-      elif command['type'] == b'\x3c\x00':
-        command['variant'] = None
-        command['optlen'] = None
-
-      # - Constant length commands
-      else:
-        command['variant'] = None # these commands have no variants
-
-        if command['type'] == b'\x28\x00': command['optlen'] = 4
-        elif command['type'] == b'\x6e\x00': command['optlen'] = 2
-        elif command['type'] == b'\x32\x00': command['optlen'] = 4
-        elif command['type'] == b'\x3c\x00': command['optlen'] = 1
+      # See what the option-length course-of-action is for this command
+      try:
+        command_choice = OPTION_LENGTHS[c_type]
+      except KeyError:
+        # Deal with weird russian exception (see Notes.md)
+        if c_type == '3F 04': c_variant = None; c_optlen = 0
         else:
-          # Weird russian exception in SYS_Get_Fish.msbt in one spot
-          if command['type'] == b'\x3f\x04':
-            continue
-          else:
-            s = hex_stringify(command['type'])
-            raise Exception(f"Unknown command: 0x{s} at pair {i}")
+          raise Exception(
+            f"Unknown command: {c_type}. Message index: {i * 2}."
+          ) from None
+
+      # Check what to do with that 
+      if type(command_choice) is int: # fixed option-length
+        c_variant = None
+        c_optlen = command_choice
+      elif type(command_choice) is dict: # variants with different opt-lengths
+        c_variant = hex_stringify(next(iterator)[1])
+        try: # check if this variant defined
+          c_optlen = OPTION_LENGTHS[c_type][c_variant]
+        except KeyError: # see if an else condition is defined
+          try: c_optlen = OPTION_LENGTHS[c_type]['else']
+          except KeyError: # throw exception
+            raise Exception(
+              f"Unknown variant {c_variant} for command {c_type}."
+            ) from None
+      elif type(command_choice) is tuple: # read-until
+        c_variant = None
+        c_optlen = None
+        c_until = OPTION_LENGTHS[c_type]
+      else:
+        raise Exception(
+          "Incorrect type in option-lengths dictionary: " +
+          f" {type(command_choice)}."
+        )
 
       # -- Now that we know how many shorts (options) follow, grab them
-      command['options'] = []
-      reads = 0
-      while True: # certain types have different break-points
-        # break if optlen is given *and* surpassed
-        if command['optlen'] is not None and reads >= command['optlen']:
-          break
+      c_options = []
+      if type(c_optlen) is int: # if we know how long the options are
+        # read that many of them
+        for _ in range(0, c_optlen):
+          c_options.append(hex_stringify(next(iterator)[1]))
+      elif c_optlen is None: # if we don't know how long...
+        # read until the most recently read short matches the terminator
+        while True: # emulate do-while
+          c_options.append(hex_stringify(next(iterator)[1]))
+          if c_options[-1] == c_until[0]: break # emulate do-while
+        if c_until[1] != True:
+          c_options = c_options[:-1] # cut off terminator if not desired
+      else:
+        raise Exception(
+          f"Incorrect type in option-lengths dictionary: {type(c_optlen)}."
+        )
 
-        reads += 1
-        raw_option = next(iterator)[1]
-
-        # break if optlen not given, and we hit a 0x0000 string
-        if command['optlen'] is None and raw_option == b'\x00\x00':
-          # store how many bytes we read, used to cut them off later
-          command['optlen'] = reads
-          break
-
-        # Else
-        option = hex_stringify(raw_option)
-        command['options'].append(option)
-
-      # Serialize the type and variant (can't be binary-strings)
-      for prop in ('variant', 'type'):
-        if command[prop] is not None:
-          command[prop] = hex_stringify(command[prop])
-
-      commands.append(command)
+      commands.append({
+        'index': c_index,
+        'type': c_type,
+        'variant': c_variant,
+        'options': c_options
+      })
 
   # End of iterating 
 
@@ -192,7 +194,7 @@ def process_commands(message, endian, verbose=False):
   # A lot of numbers need to be doubled to go from counting shorts to bytes...
   totalcut = 0
   for command in commands:
-    cutsize = command['optlen'] + 2 # include escape and type (0E 00 & 28 00)
+    cutsize = len(command['options']) + 2 # include escape and type (0E 00 & 28 00)
     if command['variant'] is not None: cutsize += 1 # include variant byte
     cutsize *= 2
 
@@ -200,6 +202,5 @@ def process_commands(message, endian, verbose=False):
     message = message[0 : start] + message[start + cutsize : ]
 
     totalcut += cutsize
-    del command['optlen']
 
   return message, commands
