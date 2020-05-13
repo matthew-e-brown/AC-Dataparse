@@ -29,7 +29,7 @@ to a longer explanation, where applicable.
 | :----------------------------- | :-------- | :----------------------- | :---------------------- |
 | [`00 00`](#00-00-command-type) | Null      | Variable                 | Modify Text             |
 | [`28 00`](#28-00-command-type) | `(`       | 8 bytes, 4 shorts        | *Unknown*               |
-| [`0A 00`](#0A-00-command-type) | `\n`      | 4 bytes, 2 shorts        | *Unknown*               |
+| [`0A 00`](#0A-00-command-type) | `\n`      | Variable                 | Pausing (?)             |
 | [`6E 00`](#6E-00-command-type) | `n`       | 4 bytes, 2 shorts        | Pausing/Delay (?)       |
 | [`32 00`](#32-00-command-type) | `2`       | 8 bytes, 4 shorts        | *Unknown*               |
 | [`3C 00`](#3C-00-command-type) | `<`       | Variable, until `00 00`  | *Unknown*, menu option? |
@@ -100,7 +100,64 @@ Currently unknown.
 
 ### `0A 00` Command Type
 
-Currently unknown.
+This command seems to be used for pausing. However, there are variants of it.
+Only one seems to have a clear usage.
+
+| Command Variant                     | Number of options | Meaning              |
+| :---------------------------------- | :---------------- | :------------------- |
+| [`00 00`](#00-00-command-variant-1) | 4 bytes, 2 shorts | Pause for `n` frames |
+| [`01 00`](#01-00-command-variant)   | 2 bytes, 1 short  | *Unknown*            |
+| [`02 00`](#02-00-command-variant-1) | 2 bytes, 1 short  | *Unknown*            |
+| [`0A 00`](#0a-00-command-variant)   | 2 bytes, 1 short  | *Unknown*            |
+
+**Important note**: With regards to variants `01 00`, `02 00` and `0A 00`: it's
+possible that the `0A 00` command has behaviour for `00 00` variants and
+behaviour for everything else. Writing
+[`parse-dialogue.py`](./parse-dialogue.py) in this manner parses all files
+without error, so I will work under this assumption for now.
+
+
+#### `00 00` Command Variant
+
+This variant is always followed by a `02 00` byte sequence. The next byte after
+that sequence is a short representing frames to wait for. For example:
+
+```
+Offset(h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+
+0000ECF0  02 00 00 00 20 00 49 00 20 00 73 00 61 00 79 00  .... .I. .s.a.y.
+0000ED00  20 00 61 00 67 00 61 00 69 00 6E 00 0E 00 6E 00   .a.g.a.i.n...n.
+0000ED10  00 00 00 00 0E 00 0A 00 00 00 02 00 0D 00 0E 00  ................
+0000ED20  28 00 0F 00 04 00 00 CD 00 00 42 00 41 00 52 00  (......Í..B.A.R.
+0000ED30  42 00 45 00 44 00 2E 00 0A 00 0E 00 0A 00 00 00  B.E.D...........
+0000ED40  02 00 0D 00 42 00 45 00 4C 00 4C 00 59 00 2E 00  ....B.E.L.L.Y...
+0000ED50  0E 00 0A 00 00 00 02 00 0D 00 20 00 48 00 41 00  .......... .H.A.
+0000ED60  49 00 52 00 21 00 0E 00 00 00 03 00 02 00 01 00  I.R.!...........
+```
+
+At offset `0xED14`, a `0A 00` `00 00` command is started. Following that, there
+are bytes `02 00` `0D 00`. It is unclear what the `02 00` is for (perhaps
+selecting "frames" as the timer option?). The `1D 00` bytes are a frame-timer:
+`0x1D` = 29. So, the game will pause for 29 frames: 0.9667 seconds. More timers
+can be seen at the end of each "BARBED" and "BELLY" (both `0D 00`, 13 frames).
+
+
+#### `01 00` Command Variant
+
+Currently unknown. This command always seems to be of the form `0E 00` `0A 00`
+`01 00` `00 00`.
+
+
+#### `02 00` Command Variant
+
+Currently unknown. This command always seems to be of the form `0E 00` `0A 00`
+`02 00` `00 00`.
+
+
+#### `0a 00` Command Variant
+
+Currently unknown. This command always seems to be of the form `0E 00` `0A 00`
+`0a 00` `00 00`.
 
 
 ### `6E 00` Command Type

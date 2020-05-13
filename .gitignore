@@ -2,7 +2,10 @@ __pycache__
 .vscode
 
 temp
-romfs
+
 patched_ACNH
-output
+romfs
+exefs
+
+parsed
 extracted

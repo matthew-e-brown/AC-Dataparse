@@ -70,7 +70,7 @@ def parse_file(filename, verbose=False):
           endpntr = block['offset'] + 0x10 + block['size']
 
         message, pntr = lms.read(data, pntr, endpntr - pntr)
-        message, commands = process_escapes(message, info['endian'], verbose)
+        message, commands = process_commands(message, info['endian'], verbose)
 
         message = {
           'body': message.decode(f"utf-{info['encode']}"),
@@ -101,7 +101,7 @@ def parse_file(filename, verbose=False):
   return message_data
 
 
-def process_escapes(message, endian, verbose=False):
+def process_commands(message, endian, verbose=False):
   commands = []
 
   # Split the message into a list of pairs of two bytes
@@ -114,13 +114,28 @@ def process_escapes(message, endian, verbose=False):
       command['index'] = i # the index into the iterator the command is found
       command['type'] = next(iterator)[1] # Read next pair of bytes
 
-      # - Variable length commands
+      # - Variable length command
       if command['type'] == b'\x00\x00':
         command['variant'] = next(iterator)[1]
         if command['variant'] == b'\x00\x00': command['optlen'] = 3
         elif command['variant'] == b'\x02\x00': command['optlen'] = 2
         elif command['variant'] == b'\x03\x00': command['optlen'] = 2
         elif command['variant'] == b'\x04\x00': command['optlen'] = 1
+      
+      elif command['type'] == b'\x0a\x00':
+        command['variant'] = next(iterator)[1]
+        if command['variant'] == b'\x00\x00': command['optlen'] = 2
+        # See notes: I think this command type is a "00 00 vs everything else"
+        # situation.
+        #
+        # elif command['variant'] == b'\x01\x00': command['optlen'] = 1
+        # elif command['variant'] == b'\x02\x00': command['optlen'] = 1
+        # elif command['variant'] == b'\x0a\x00': command['optlen'] = 1
+        # else:
+        #   s1 = hex_stringify(command['type'])
+        #   s2 = hex_stringify(command['variant'])
+        #   raise Exception(f"Unknown variant: 0x{s2} in command 0x{s1} at pair {i}")
+        else: command['optlen'] = 1
 
       # - Variable length, no variants. Will be read until 0x0000
       elif command['type'] == b'\x3c\x00':
@@ -132,35 +147,37 @@ def process_escapes(message, endian, verbose=False):
         command['variant'] = None # these commands have no variants
 
         if command['type'] == b'\x28\x00': command['optlen'] = 4
-        elif command['type'] == b'\x0a\x00': command['optlen'] = 2
         elif command['type'] == b'\x6e\x00': command['optlen'] = 2
         elif command['type'] == b'\x32\x00': command['optlen'] = 4
         elif command['type'] == b'\x3c\x00': command['optlen'] = 1
         else:
           # Weird russian exception in SYS_Get_Fish.msbt in one spot
-          if command['type'] == b'\x3f\x04': continue
-          raise Exception(f"Unknown command: 0x{command['type'].hex()}")
+          if command['type'] == b'\x3f\x04':
+            continue
+          else:
+            s = hex_stringify(command['type'])
+            raise Exception(f"Unknown command: 0x{s} at pair {i}")
 
       # -- Now that we know how many shorts (options) follow, grab them
       command['options'] = []
       reads = 0
       while True: # certain types have different break-points
+        # break if optlen is given *and* surpassed
+        if command['optlen'] is not None and reads >= command['optlen']:
+          break
+
+        reads += 1
         raw_option = next(iterator)[1]
 
         # break if optlen not given, and we hit a 0x0000 string
         if command['optlen'] is None and raw_option == b'\x00\x00':
           # store how many bytes we read, used to cut them off later
-          command['optlen'] = reads + 1
+          command['optlen'] = reads
           break
 
         # Else
-        reads += 1
-        option = int.from_bytes(raw_option, endian, signed=False)
+        option = hex_stringify(raw_option)
         command['options'].append(option)
-
-        # break if optlen is given *and* surpassed
-        if command['optlen'] is not None and reads >= command['optlen']:
-          break
 
       # Serialize the type and variant (can't be binary-strings)
       for prop in ('variant', 'type'):
