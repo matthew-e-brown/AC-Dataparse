@@ -10,8 +10,6 @@ encoded to UTF-16, and sequences unicode code-point will go from bytes `AB CD`
 to `\uCDAB`.
 
 
----
-
 ## Table of Contents
 
 - [`E0 00` Control Sequences](#e0-00-control-sequences)
@@ -33,8 +31,6 @@ to `\uCDAB`.
     - [`3C 00` Command Type](#3c-00-command-type)
       - [Rough/Scratch notes](#roughscratch-notes)
   - [Anomalies](#anomalies)
-
----
 
 
 ## Command Types
