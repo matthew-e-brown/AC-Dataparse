@@ -15,7 +15,7 @@ def get_subdirs(dirname):
   return [ f for f in os.listdir(dirname) if os.path.isdir(f"{dirname}/{f}") ]
 
 cwd = os.path.dirname(os.path.realpath(__file__))
-all_styles = msbp.parse_file(f"{cwd}/extracted/App.msbp", verbose=False)
+all_styles = msbp.parse_file(f"{cwd}/extracted/dialogue/App.msbp", verbose=False)
 
 # The JSON files that should be made and what MSBT they come from
 OUTPUTS = {
@@ -46,13 +46,13 @@ shutil.rmtree(f"{cwd}/parsed", ignore_errors=True)
 # Each "filename" is a different language
 for output, files in OUTPUTS.items():
   print(f"Parsing {output}:") # JSON output
-  for lang in get_subdirs(f"{cwd}/extracted"):
+  for lang in get_subdirs(f"{cwd}/extracted/dialogue"):
     data = {}
     print(f"  Parsing {lang}:")
     for (name, key) in files:
       print(f"    Parsing {name}") # individual MSBT
       try:
-        data[key] = msbt.parse_file(f"{cwd}/extracted/{lang}/{name}", verbose=False)
+        data[key] = msbt.parse_file(f"{cwd}/extracted/dialogue/{lang}/{name}", verbose=False)
       except IOError as e:
         print(f"    Couldn't access {name}. Skipping.")
         continue

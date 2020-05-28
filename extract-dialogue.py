@@ -65,7 +65,7 @@ MSBT_FILES = [
 cwd = os.path.dirname(os.path.realpath(__file__))
 
 def main(romfs_path, force=False):
-  if romfs_path[1][-5:] != 'romfs' and not force:
+  if not (romfs_path.endswith('romfs') or romfs_path.endswith('romfs/')) and not force:
     print("Is this a valid romfs? (use -f to force)", file=sys.stderr)
     sys.exit(-1)
 
@@ -73,7 +73,7 @@ def main(romfs_path, force=False):
 
   # Make the destination folder
   made = False
-  extracted = f"{cwd}/extracted/"
+  extracted = f"{cwd}/extracted/dialogue/"
   while not made:
     try: os.makedirs(extracted, exist_ok=False); made = True
     except FileExistsError: rmtree(extracted)
@@ -85,7 +85,7 @@ def main(romfs_path, force=False):
 
     # Yoink app real quick
     if EXTRACT_APP and basename == 'App.msbp':
-      copyfile(filename, f"{cwd}/extracted/App.msbp")
+      copyfile(filename, f"{cwd}/extracted/dialogue/App.msbp")
 
     regexprefix = '|'.join(f['archive_name'] for f in MSBT_FILES)
     match = re.search(fr"({regexprefix})_([A-Z]{{2}}[a-z]{{2}})\.sarc\.zs", basename)
@@ -117,8 +117,8 @@ def main(romfs_path, force=False):
       dialoguebase = os.path.basename(dialoguefile)
       if dialoguebase not in FILE['dialogues']: continue
 
-      os.makedirs(f"{cwd}/extracted/{filelang}", exist_ok=True)
-      os.rename(dialoguefile, f"{cwd}/extracted/{filelang}/{dialoguebase}")
+      os.makedirs(f"{cwd}/extracted/dialogue/{filelang}", exist_ok=True)
+      os.rename(dialoguefile, f"{cwd}/extracted/dialogue/{filelang}/{dialoguebase}")
 
   rmtree(f"{cwd}/temp")
 

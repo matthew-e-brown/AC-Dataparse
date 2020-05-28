@@ -1,7 +1,7 @@
 # AC DataParse
 
 This is a series of scripts with the goal of extracting several files from
-Animal Crossing: New Horizons and formatting them in JSON format.
+Animal Crossing: New Horizons and formatting them.
 
 This repository is a set of tools that I'm using to develop another project of
 mine. These tools have been pulled out of that project into their own repository
@@ -13,7 +13,7 @@ Nintendo's custom file formats,
 [here](https://github.com/Kinnay/Nintendo-File-Formats/wiki).
 
 See [`Notes.md`](Notes.md) for a rundown of how the `00 0e` escape sequences
-work.
+work in the `.msbt` files.
 
 
 ## Scripts
@@ -38,6 +38,12 @@ names.
 This file will take the output of [`extract.py`](#extractpy) and read through
 the `.msbt` files to grab all of the dialogue. They are exported to a folder
 called `parsed`.
+
+
+### [`extract-others.py`](extract-others.py)
+
+This file, like [`extract-dialogue.py`](#extract-dialoguepy), takes a path to
+the `romfs` folder and dumps to `extracted` subfolder. 
 
 
 ## Vendors
