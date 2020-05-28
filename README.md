@@ -43,7 +43,12 @@ called `parsed`.
 ### [`extract-others.py`](extract-others.py)
 
 This file, like [`extract-dialogue.py`](#extract-dialoguepy), takes a path to
-the `romfs` folder and dumps to `extracted` subfolder. 
+the `romfs` folder and dumps to the `extracted` subfolder. 
+
+By default, this script will extract a collection of `.bfres` files for the
+items in the museum. These can be passed to
+[Switch-Toolbox](https://github.com/KillzXGaming/Switch-Toolbox)'s *Tools →
+Batch Export Models* option to get `.dae`/COLLADA models.
 
 
 ## Vendors
